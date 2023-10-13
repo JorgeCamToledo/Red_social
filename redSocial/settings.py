@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,15 +46,15 @@ INSTALLED_APPS = [
     'applications.followers',
     'applications.posts',
     'applications.profiles',
-    'applications.reactions'
+    'applications.reactions',
+    'applications.authentication'
 ]
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
+    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
 MIDDLEWARE = [
@@ -66,6 +67,50 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=3),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_GRACE_PERIOD': timedelta(days=0),
+    'SLIDING_TOKEN_LIFETIME_GRACE_PERIOD': timedelta(days=0),
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_EXP_CLAIM': 'exp',
+    'ROTATE_REFRESH_TOKENS': False,
+    'ALWAYS_ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'AUTH_COOKIE': None,
+    'AUTH_COOKIE_SECURE': False,
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_SAMESITE': 'Lax',
+    'AUTH_COOKIE_PATH': '/',
+    'AUTH_COOKIE_DOMAIN': None,
+    'AUTH_COOKIE_CONSENT_FLAG': None,
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'AUTH_HEADER_PREFIX': 'Bearer',
+    'AUTH_REFRESH_COOKIE': None,
+    'AUTH_REFRESH_COOKIE_SECURE': False,
+    'AUTH_REFRESH_COOKIE_HTTP_ONLY': True,
+    'AUTH_REFRESH_COOKIE_SAMESITE': 'Lax',
+    'AUTH_REFRESH_COOKIE_PATH': '/',
+    'AUTH_REFRESH_COOKIE_DOMAIN': None,
+    'AUTH_REFRESH_COOKIE_CONSENT_FLAG': None,
+    'SLIDING_TOKEN_REFRESH_COOKIE': None,
+    'SLIDING_TOKEN_REFRESH_COOKIE_SECURE': False,
+    'SLIDING_TOKEN_REFRESH_COOKIE_HTTP_ONLY': True,
+    'SLIDING_TOKEN_REFRESH_COOKIE_SAMESITE': 'Lax',
+    'SLIDING_TOKEN_REFRESH_COOKIE_PATH': '/',
+    'SLIDING_TOKEN_REFRESH_COOKIE_DOMAIN': None,
+    'SLIDING_TOKEN_REFRESH_COOKIE_CONSENT_FLAG': None,
+    'LIST_DELETE_ON_LOGOUT': False,
+}
 
 ROOT_URLCONF = 'redSocial.urls'
 
