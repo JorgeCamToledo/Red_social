@@ -9,32 +9,43 @@ from django.conf import settings
 from applications.followers.models import Follower
 from applications.profiles.serializers import ChangeCoverPhotoSerializer, ChangeProfilePhotoSerializer, ChangPrivacySerializer,ViewProfileSerialier
 from applications.history.models import History
-
+from utils.exceptions import ExcepcionPersonalizada
+from utils.responses import ResponseModel
 
 class ChangeProfilePhotoView(APIView):
 
     def patch(self,request):
-        profile = Profile.get_profile(request.user.id)
-        
-        if not profile:
-            return Response("No se encontro el perfil del usuario", status=status.HTTP_204_NO_CONTENT)
+        try:
+            profile = Profile.get_profile(request.user.id)
             
-        serializer = ChangeProfilePhotoSerializer(profile, data = request.data)
-        if serializer.is_valid():
-            image_url_original = profile.image_profile.url if profile.image_profile else None
-            profile_updated = serializer.save()
-            if image_url_original:
-                image_path_original = image_url_original.replace(settings.MEDIA_URL, '', 1)
-                default_storage.delete(image_path_original)
-            print(profile_updated)
-            data = {
-                "username": request.user.username,
-                "profile_photo": profile.image_profile.url if profile.image_profile else None
+            if not profile:
+                raise ExcepcionPersonalizada("No se encontro el perfil del usuario", status=status.HTTP_204_NO_CONTENT)                
+            serializer = ChangeProfilePhotoSerializer(profile, data = request.data)
+            if serializer.is_valid():
+                image_url_original = profile.image_profile.url if profile.image_profile else None
+                profile_updated = serializer.save()
+                if image_url_original:
+                    image_path_original = image_url_original.replace(settings.MEDIA_URL, '', 1)
+                    default_storage.delete(image_path_original)
+                print(profile_updated)
+                data = {
+                    "username": request.user.username,
+                    "profile_photo": profile.image_profile.url if profile.image_profile else None
+                }
+                history_entry = History(username=request.user.username, event=f'Cambio su foto de perfil')
+                history_entry.save()
+                return Response(data, status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        except ExcepcionPersonalizada as e:
+            error_message = str(e.mensaje)
+            estatus = e.status
+            response_error = {
+            'status': estatus,
+            'message': error_message
             }
-            history_entry = History(username=request.user.username, event=f'Cambio su foto de perfil')
-            history_entry.save()
-            return Response(data, status=status.HTTP_200_OK)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            return Response(response_error,estatus)
+        except Exception as e:
+            return Response(f"Error {e}", status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ChangeCoverPhotoView(APIView):
     def patch(self,request):
