@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'applications.posts',
     'applications.profiles',
     'applications.reactions',
-    'applications.authentication'
+    'applications.authentication',
+    'applications.follow_request'
 ]
 
 REST_FRAMEWORK = {

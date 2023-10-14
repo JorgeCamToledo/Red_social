@@ -98,11 +98,11 @@ class ViewProflieView(APIView):
         # Si encuenttra el id de la membresia, lo manda como response
         if profile != 0:
             serializer = ViewProfileSerialier(profile)
-            privacidad = serializer.data['is_public']
+            privacity = serializer.data['is_public']
             if request.user == profile.user:
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
-            if not privacidad:
+            if not privacity:
                 return Response("Este perfil es privado, primero debes seguir a este usuario", status=status.HTTP_204_NO_CONTENT)
             
             return Response(serializer.data, status=status.HTTP_200_OK)

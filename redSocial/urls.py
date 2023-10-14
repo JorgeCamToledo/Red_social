@@ -9,4 +9,6 @@ urlpatterns = [
     path('api/v1/auth/', include('applications.authentication.urls')),
     path('api/v1/post/', include('applications.posts.urls')),
     path('api/v1/profile/', include('applications.profiles.urls')),
+    path('api/v1/follower/', include('applications.followers.urls')),
+    path('api/v1/follow_request/', include('applications.follow_request.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
