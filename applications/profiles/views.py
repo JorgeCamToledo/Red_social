@@ -5,6 +5,7 @@ from applications.profiles.models import Profile
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
+from applications.followers.models import Follower
 from applications.profiles.serializers import ChangeCoverPhotoSerializer, ChangeProfilePhotoSerializer, ChangPrivacySerializer,ViewProfileSerialier
 
 
@@ -91,15 +92,17 @@ class ViewProflieView(APIView):
             return Profile.objects.get(user = user) 
         except Profile.DoesNotExist:
             return 0
-        
+       
+    def is_follower(self, follower, profile_user):
+        return Follower.objects.filter(follower=follower, followed=profile_user).exists()
+     
     def get(self, request,pk):
         profile = self.get_profile(pk)
-        
         # Si encuenttra el id de la membresia, lo manda como response
         if profile != 0:
             serializer = ViewProfileSerialier(profile)
             privacity = serializer.data['is_public']
-            if request.user == profile.user:
+            if request.user == profile.user or self.is_follower(request.user, profile.user):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
             if not privacity:
