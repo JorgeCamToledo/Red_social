@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'applications.profiles',
     'applications.reactions',
     'applications.authentication',
-    'applications.follow_request'
+    'applications.follow_request',
+    'applications.history'
 ]
 
 REST_FRAMEWORK = {
@@ -56,7 +57,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 3
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -145,9 +150,17 @@ DATABASES = {
         'PASSWORD': 'Nintendo64',
         'HOST': 'localhost',
         'PORT': '5432'
+    },
+    'mongodb': {
+        'ENGINE': 'djongo',
+        'CLIENT':{
+            'host':'mongodb+srv://camachoja0402:au215IquCwhQycrs@redsocialcluster.xibaojw.mongodb.net/',
+            },
+        'NAME':'Historial_RedSocial'
+        # Otras configuraciones de MongoDB
     }
 }
-
+DATABASE_ROUTERS = ['applications.history.routers.MongoDBRouter',]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

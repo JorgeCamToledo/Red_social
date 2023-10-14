@@ -6,6 +6,7 @@ from applications.profiles.models import Profile
 from applications.posts.models import Post
 from applications.followers.models import Follower
 from applications.comments.models import Comment
+from applications.history.models import History
 
 
 class CommentList(APIView):
@@ -24,6 +25,8 @@ class CommentList(APIView):
             if request.user == profile_who_post.user or Follower.is_follower(request.user, profile_who_post.user):
                 serializer.save()
                 serializer_response = serializer.data
+                history_entry = History(username=request.user.username, event=f'Se ha creado un comentario en el post {post.id}')
+                history_entry.save()
                 return Response(serializer_response, status=status.HTTP_201_CREATED)
             if not privacity:
                     return Response("Este perfil es privado, primero debes seguir a este usuario", status=status.HTTP_204_NO_CONTENT)

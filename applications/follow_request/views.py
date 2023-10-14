@@ -2,12 +2,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.models import User
 from applications.followers.models import Follower
-from applications.profiles.models import Profile
 from applications.follow_request.models import FollowRequest
-from applications.follow_request.serializers import FollowRequestSerializer,GetFollowRequestSerializer
-
+from applications.follow_request.serializers import GetFollowRequestSerializer
+from applications.history.models import History
 class ListFollowRequestView(APIView):
     
     def get(self,request):
@@ -29,6 +27,8 @@ class FollowRequestDetailView(APIView):
             print(requester)
             follow_request.save()
             follower, created = Follower.objects.get_or_create(follower=follow_request.requester, followed=request.user)
+            history_entry = History(username=request.user.username, event=f'acepto la solicitud de {requester}')
+            history_entry.save()
             return Response(f"Solicitud de {requester} aprobada", status=status.HTTP_200_OK)
         return Response("No se encontro el elemento buscado", status=status.HTTP_204_NO_CONTENT)
         

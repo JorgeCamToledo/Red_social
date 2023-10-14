@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from applications.followers.models import Follower
 from applications.profiles.models import Profile
 from applications.follow_request.models import FollowRequest
+from applications.history.models import History
 
 class FollowView(APIView):
     def get_user(self, pk):
@@ -29,12 +30,16 @@ class FollowView(APIView):
         if not privacity:
             follow_request, created = FollowRequest.objects.get_or_create(requester=request.user, receiver = user_to_follow)
             if created:
+                history_entry = History(username=request.user.username, event=f'Se envio una solicitud de seguimiento a {user_to_follow.username}')
+                history_entry.save()
                 return Response("Solicitud de seguimiento enviada. Espera a que el usuario confirme.", status=status.HTTP_200_OK)
             else:
                 return Response("Ya has enviado una solicitud de seguimiento a este usuario previamente.", status=status.HTTP_200_OK)
         
         follower, created = Follower.objects.get_or_create(follower=request.user, followed=user_to_follow)
         if created:
+            history_entry = History(username=request.user.username, event=f'Empezo a seguir {user_to_follow.username}')
+            history_entry.save()
             return Response({"message": f"Siguiendo a {user_to_follow.username}"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"message": f"Ya estás siguiendo a {user_to_follow.username}"}, status=status.HTTP_200_OK)

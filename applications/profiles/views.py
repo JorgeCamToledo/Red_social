@@ -8,6 +8,7 @@ from applications.posts.serializers import GetPostsSerializer
 from django.conf import settings
 from applications.followers.models import Follower
 from applications.profiles.serializers import ChangeCoverPhotoSerializer, ChangeProfilePhotoSerializer, ChangPrivacySerializer,ViewProfileSerialier
+from applications.history.models import History
 
 
 class ChangeProfilePhotoView(APIView):
@@ -30,6 +31,8 @@ class ChangeProfilePhotoView(APIView):
                 "username": request.user.username,
                 "profile_photo": profile.image_profile.url if profile.image_profile else None
             }
+            history_entry = History(username=request.user.username, event=f'Cambio su foto de perfil')
+            history_entry.save()
             return Response(data, status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
@@ -52,6 +55,8 @@ class ChangeCoverPhotoView(APIView):
                 "username": request.user.username,
                 "profile_photo": profile.image_cover.url if profile.image_cover else None
             }
+            history_entry = History(username=request.user.username, event=f'Cambio su foto de portada')
+            history_entry.save()
             return Response(data, status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
@@ -67,6 +72,8 @@ class ChangePrivacityView(APIView):
         if serializer.is_valid():
             serializer.save()
             datas = serializer.data
+            history_entry = History(username=request.user.username, event=f'Cambio la privacidad de su perfil')
+            history_entry.save()
             return Response(datas, status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
