@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from applications.posts.serializers import PostSerializer
+from applications.posts.serializers import PostSerializer,GetPostsSerializer
 from applications.posts.models import Post
 from applications.followers.models import Follower
 from applications.profiles.models import Profile
@@ -27,7 +27,7 @@ class UserPostsList(APIView):
         if profile !=0:
             privacity = profile.is_public
             queryset = Post.objects.filter(user = pk).order_by('created_at')
-            serializer = PostSerializer(queryset, many=True, context={'request':request})
+            serializer = GetPostsSerializer(queryset, many=True, context={'request':request})
             if request.user == profile.user or Follower.is_follower(request.user, profile.user):
                     return Response(serializer.data, status=status.HTTP_200_OK)
             if not privacity:

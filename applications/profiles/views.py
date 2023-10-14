@@ -3,7 +3,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from applications.profiles.models import Profile
 from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
+from applications.posts.models import Post
+from applications.posts.serializers import GetPostsSerializer
 from django.conf import settings
 from applications.followers.models import Follower
 from applications.profiles.serializers import ChangeCoverPhotoSerializer, ChangeProfilePhotoSerializer, ChangPrivacySerializer,ViewProfileSerialier
@@ -75,13 +76,16 @@ class ViewProflieView(APIView):
         profile = Profile.get_profile(pk)
         # Si encuenttra el id de la membresia, lo manda como response
         if profile != 0:
+            posts = Post.objects.filter(user=profile.user)
             serializer = ViewProfileSerialier(profile)
+            serialized_data = serializer.data
+            serialized_data['posts'] = GetPostsSerializer(posts, many=True).data
             privacity = serializer.data['is_public']
             if request.user == profile.user or Follower.is_follower(request.user, profile.user):
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serialized_data, status=status.HTTP_200_OK)
             
             if not privacity:
                 return Response("Este perfil es privado, primero debes seguir a este usuario", status=status.HTTP_204_NO_CONTENT)
             
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serialized_data, status=status.HTTP_200_OK)
         return Response("No se encontro el perfil del usuario", status=status.HTTP_204_NO_CONTENT)
