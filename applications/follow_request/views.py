@@ -6,26 +6,30 @@ from django.contrib.auth.models import User
 from applications.followers.models import Follower
 from applications.profiles.models import Profile
 from applications.follow_request.models import FollowRequest
-from applications.follow_request.serializers import FollowRequestSerializer
+from applications.follow_request.serializers import FollowRequestSerializer,GetFollowRequestSerializer
 
 class ListFollowRequestView(APIView):
     
     def get(self,request):
         user = request.user.id
         follow_requests = FollowRequest.objects.filter(receiver = user)
-        serializer = FollowRequestSerializer(follow_requests,many=True)
+        serializer = GetFollowRequestSerializer(follow_requests,many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class FollowRequestDetailView(APIView):
     def put(self, request, pk):
-        follow_request = FollowRequest.objects.get(id=pk)
+        follow_request = FollowRequest.get_followRequest(pk)
+        
+        if follow_request != 0:
+            if request.user != follow_request.receiver:
+                return Response("No tienes permiso para aprobar esta solicitud.", status=status.HTTP_403_FORBIDDEN)
 
-        if request.user != follow_request.receiver:
-            return Response("No tienes permiso para aprobar esta solicitud.", status=status.HTTP_403_FORBIDDEN)
-
-        follow_request.approved = True
-        follow_request.save()
-        follower, created = Follower.objects.get_or_create(follower=follow_request.requester, followed=request.user)
-        return Response("Solicitud aprobada.", status=status.HTTP_200_OK)
+            follow_request.approved = True
+            requester = follow_request.requester
+            print(requester)
+            follow_request.save()
+            follower, created = Follower.objects.get_or_create(follower=follow_request.requester, followed=request.user)
+            return Response(f"Solicitud de {requester} aprobada", status=status.HTTP_200_OK)
+        return Response("No se encontro el elemento buscado", status=status.HTTP_204_NO_CONTENT)
         
         

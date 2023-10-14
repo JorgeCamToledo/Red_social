@@ -9,3 +9,9 @@ class FollowRequest(models.Model):
     
     class Meta:
         db_table = "Follower_request"
+    
+    def get_followRequest(pk):
+        try:
+            return FollowRequest.objects.get(id=pk)
+        except FollowRequest.DoesNotExist:
+            return 0

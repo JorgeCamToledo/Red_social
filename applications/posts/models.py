@@ -10,3 +10,9 @@ class Post(models.Model):
    
     class Meta:
         db_table = "Post"
+        
+    def get_Post_byId(pk):
+        try:
+            return Post.objects.get(id = pk) 
+        except Post.DoesNotExist:
+            return 0

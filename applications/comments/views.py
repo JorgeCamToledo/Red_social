@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from applications.comments.serializers import CommentSerializer
+from applications.comments.serializers import CommentSerializer,GetCommentsSerializer
 from applications.profiles.models import Profile
 from applications.posts.models import Post
 from applications.followers.models import Follower
@@ -12,8 +12,12 @@ class CommentList(APIView):
         
     def post(self,request):
         request.data['user'] = request.user.id
-        post = Post.objects.get(id = request.data['post'])
+        post = Post.get_Post_byId(request.data['post'])
+        if post == 0:
+            return Response('No se encontro el post', status=status.HTTP_204_NO_CONTENT)
         profile_who_post = Profile.get_profile(user = post.user)
+        if profile_who_post == 0:
+            return Response('No se encontro el perfil que publico ese comentario', status=status.HTTP_204_NO_CONTENT)
         privacity = profile_who_post.is_public
         serializer=CommentSerializer(data=request.data)
         if serializer.is_valid():
@@ -27,11 +31,13 @@ class CommentList(APIView):
     
 class ListCommentsByPost(APIView):
     def get(self, request, pk,):
-        post = Post.objects.get(id = pk)
+        post = Post.get_Post_byId(pk)
+        if post == 0:
+            return Response('No se encontro el elemento buscado', status=status.HTTP_204_NO_CONTENT)
         profile_who_post = Profile.get_profile(user = post.user)
         privacity = profile_who_post.is_public
         queryset = Comment.objects.filter(post = pk).order_by('id')
-        serializer = CommentSerializer(queryset, many=True, context={'request':request})
+        serializer = GetCommentsSerializer(queryset, many=True, context={'request':request})
         if request.user == profile_who_post.user or Follower.is_follower(request.user, profile_who_post.user):
             return Response(serializer.data,status=200)
         if not privacity:

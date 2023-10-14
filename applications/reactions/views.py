@@ -6,7 +6,7 @@ from applications.profiles.models import Profile
 from applications.posts.models import Post
 from applications.followers.models import Follower
 from applications.comments.models import Comment
-from applications.reactions.serializers import ReactionSerializer
+from applications.reactions.serializers import ReactionSerializer,GetReactionSerializer
 from applications.reactions.models import Reaction
 
 
@@ -15,11 +15,12 @@ class ReactionList(APIView):
     def post(self, request):
         print(request.user)
         request.data['user'] = request.user.id
-        try:
-            post = Post.objects.get(id=request.data['post'])
-        except Post.DoesNotExist:
-            return Response("No se encontró la publicación", status=status.HTTP_400_BAD_REQUEST)
+        post = Post.get_Post_byId(request.data['post'])
+        if post == 0:
+            return Response('No se encontro el post', status=status.HTTP_204_NO_CONTENT)
         profile_who_post = Profile.get_profile(user = post.user)
+        if profile_who_post == 0:
+            return Response('No se encontro el perfil que reacciono a este post', status=status.HTTP_204_NO_CONTENT)
         privacity = profile_who_post.is_public
         # Verificar si el usuario ya ha reaccionado a esta publicación
         existing_reaction = Reaction.objects.filter(user=request.user, post=post).first()
@@ -46,11 +47,15 @@ class ReactionList(APIView):
         
 class ListReactionsByPost(APIView):
     def get(self, request, pk,):
-        post = Post.objects.get(id = pk)
+        post = Post.get_Post_byId(pk)
+        if post == 0:
+            return Response('No se encontro el post', status=status.HTTP_204_NO_CONTENT)
         profile_who_post = Profile.get_profile(user = post.user)
+        if profile_who_post == 0:
+            return Response('No se encontro el perfil que reacciono a este post', status=status.HTTP_204_NO_CONTENT)
         privacity = profile_who_post.is_public
         queryset = Reaction.objects.filter(post = pk).order_by('id')
-        serializer = ReactionSerializer(queryset, many=True, context={'request':request})
+        serializer = GetReactionSerializer(queryset, many=True, context={'request':request})
         if request.user == profile_who_post.user or Follower.is_follower(request.user, profile_who_post.user):
             return Response(serializer.data,status=200)
         if not privacity:
