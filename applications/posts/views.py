@@ -34,3 +34,26 @@ class UserPostsList(APIView):
                     return Response("Este perfil es privado, primero debes seguir a este usuario", status=status.HTTP_204_NO_CONTENT)
             return Response(serializer.data,status=200)
         return Response("No se encontro el perfil del usuario", status=status.HTTP_204_NO_CONTENT)
+    
+class PostByFollowedUsers(APIView):
+    def get(self, request):
+        user = request.user
+
+        # Obtén los usuarios que sigues
+        following_users = Follower.objects.filter(follower=user).values_list('followed', flat=True)
+
+        # Obtén los perfiles de los usuarios que sigues
+        following_profiles = Profile.objects.filter(user__in=following_users)
+
+        # Ahora, `following_profiles` contiene los perfiles de los usuarios a los que sigues
+        
+        queryset = Post.objects.filter(user__detalles_usuario__in=following_profiles).order_by('-created_at')
+
+        # Modifica los resultados para asignar el username al campo user
+        posts_with_username = [
+            {"id": post.id, "images": post.images.url, "descripcion": post.descripcion, "created_at": post.created_at, "user": post.user.username}
+            for post in queryset
+        ]
+
+        # Envía la respuesta con los datos modificados
+        return Response(posts_with_username, status=status.HTTP_200_OK)

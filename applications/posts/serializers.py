@@ -23,7 +23,7 @@ class GetPostsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Post
-        fields = ['id', 'images', 'descripcion', 'created_at', 'comment_count', 'reaction_count','view_comments','view_people_who_react']
+        fields = ['id', 'images', 'descripcion', 'created_at', 'comment_count', 'reaction_count','view_comments','view_people_who_react','user']
         
         
 class PostSerializer(serializers.ModelSerializer):
