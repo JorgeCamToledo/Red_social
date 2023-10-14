@@ -13,11 +13,6 @@ class FollowView(APIView):
             return User.objects.get(id = pk) 
         except User.DoesNotExist:
             return 0
-    def get_profile(self, user):
-        try:
-            return Profile.objects.get(user = user) 
-        except Profile.DoesNotExist:
-            return 0
     
     def post(self,request):
         user_to_follow = self.get_user(request.data['user'])
@@ -25,7 +20,7 @@ class FollowView(APIView):
         if not user_to_follow:
             return Response("No se encontro el perfil del usuario", status=status.HTTP_204_NO_CONTENT)
         
-        profile_user_to_follow = self.get_profile(user = user_to_follow.id)
+        profile_user_to_follow = Profile.get_profile(user = user_to_follow.id)
         privacity =profile_user_to_follow.is_public
         
         if user_to_follow == request.user:

@@ -10,6 +10,12 @@ class Profile(models.Model):
    
     def __str__(self):
         return self.user.username
+    
+    def get_profile(user):
+        try:
+            return Profile.objects.get(user = user) 
+        except Profile.DoesNotExist:
+            return 0
 
     class Meta:
         db_table = "Profile"

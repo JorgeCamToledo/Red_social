@@ -3,7 +3,7 @@ from django.urls import path
 
 urlpatterns = [
     path('', PostList.as_view(), name='postear'),
-    path('<pk>/', UserPostsList.as_view(), name='ver posts'),
+    path('by_user/<pk>/', UserPostsList.as_view(), name='ver posts'),
     
     
 ]

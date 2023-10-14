@@ -10,14 +10,9 @@ from applications.profiles.serializers import ChangeCoverPhotoSerializer, Change
 
 
 class ChangeProfilePhotoView(APIView):
-    def get_profile(self, user):
-        try:
-            return Profile.objects.get(user = user) 
-        except Profile.DoesNotExist:
-            return 0
 
     def patch(self,request):
-        profile = self.get_profile(request.user.id)
+        profile = Profile.get_profile(request.user.id)
         
         if not profile:
             return Response("No se encontro el perfil del usuario", status=status.HTTP_204_NO_CONTENT)
@@ -38,14 +33,8 @@ class ChangeProfilePhotoView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class ChangeCoverPhotoView(APIView):
-    def get_profile(self, user):
-        try:
-            return Profile.objects.get(user = user) 
-        except Profile.DoesNotExist:
-            return 0
-
     def patch(self,request):
-        profile = self.get_profile(request.user.id)
+        profile = Profile.get_profile(request.user.id)
         
         if not profile:
             return Response("No se encontro el perfil del usuario", status=status.HTTP_204_NO_CONTENT)
@@ -66,14 +55,8 @@ class ChangeCoverPhotoView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 class ChangePrivacityView(APIView):
-    def get_profile(self, user):
-        try:
-            return Profile.objects.get(user = user) 
-        except Profile.DoesNotExist:
-            return 0
-        
     def patch(self, request):
-        profile = self.get_profile(request.user.id)
+        profile = Profile.get_profile(request.user.id)
         
 
         if not profile:
@@ -87,22 +70,14 @@ class ChangePrivacityView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class ViewProflieView(APIView):
-    def get_profile(self, user):
-        try:
-            return Profile.objects.get(user = user) 
-        except Profile.DoesNotExist:
-            return 0
-       
-    def is_follower(self, follower, profile_user):
-        return Follower.objects.filter(follower=follower, followed=profile_user).exists()
-     
+    
     def get(self, request,pk):
-        profile = self.get_profile(pk)
+        profile = Profile.get_profile(pk)
         # Si encuenttra el id de la membresia, lo manda como response
         if profile != 0:
             serializer = ViewProfileSerialier(profile)
             privacity = serializer.data['is_public']
-            if request.user == profile.user or self.is_follower(request.user, profile.user):
+            if request.user == profile.user or Follower.is_follower(request.user, profile.user):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
             if not privacity:

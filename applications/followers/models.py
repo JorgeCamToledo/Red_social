@@ -8,3 +8,6 @@ class Follower(models.Model):
 
     class Meta:
         db_table = "Follower"
+        
+    def is_follower(follower, profile_user):
+        return Follower.objects.filter(follower=follower, followed=profile_user).exists()
