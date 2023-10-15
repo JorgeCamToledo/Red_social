@@ -14,4 +14,5 @@ urlpatterns = [
     path('api/v1/comment/', include('applications.comments.urls')),
     path('api/v1/home/', include('applications.posts.urls_home')),
     path('api/v1/reaction/', include('applications.reactions.urls')),
+    path('api/v1/history/', include('applications.history.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

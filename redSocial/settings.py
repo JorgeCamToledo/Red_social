@@ -26,7 +26,7 @@ REACTION_API_URL = config('REACTION_API_URL')
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g$8g=0d(rm%$-l+_bk7u6x(7-)#e1-w85oawf+csdgjx7u5u*@'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -150,16 +150,16 @@ WSGI_APPLICATION = 'redSocial.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'RedSocial',
-        'USER': 'postgres',
-        'PASSWORD': 'Nintendo64',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     },
     'mongodb': {
         'ENGINE': 'djongo',
         'CLIENT':{
-            'host':'mongodb+srv://camachoja0402:au215IquCwhQycrs@redsocialcluster.xibaojw.mongodb.net/',
+            'host':config('MONGO_URL'),
             },
         'NAME':'Historial_RedSocial'
         # Otras configuraciones de MongoDB
