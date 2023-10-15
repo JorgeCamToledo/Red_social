@@ -2,6 +2,7 @@ from rest_framework import serializers
 from applications.posts.models import Post
 from applications.comments.models import Comment
 from applications.reactions.models import Reaction
+from django.conf import settings
 
 
 class GetPostsSerializer(serializers.ModelSerializer):
@@ -17,9 +18,9 @@ class GetPostsSerializer(serializers.ModelSerializer):
         return Reaction.objects.filter(post=post).count()
     
     def get_view_comments(self,post):
-        return f'http://localhost:8000/api/v1/comment/by_post/{post.id}/'
+        return f'{settings.COMMENT_API_URL}{post.id}/'
     def get_view_people_who_react(self,post):
-        return f'http://localhost:8000/api/v1/reaction/by_post/{post.id}/'
+        return f'{settings.REACTION_API_URL}{post.id}/'
     
     class Meta:
         model = Post

@@ -9,6 +9,9 @@ from rest_framework.pagination import PageNumberPagination
 from applications.history.models import History
 from utils.exceptions import ExcepcionPersonalizada
 from utils.responses import ResponseModel
+from applications.comments.models import Comment
+from applications.reactions.models import Reaction
+from django.conf import settings
 
 
 class PostList(APIView):
@@ -70,11 +73,23 @@ class PostByFollowedUsers(APIView):
             # Paginación: crea una instancia de PageNumberPagination y obtén la página actual
             paginator = PageNumberPagination()
             result_page = paginator.paginate_queryset(queryset, request)
+            
+            # Modifica los resultados para asignar el username al campo user
             posts_with_username = [
-                {"id": post.id, "images": post.images.url, "descripcion": post.descripcion, "created_at": post.created_at, "user": post.user.username}
+                {
+                    "id": post.id,
+                    "images": post.images.url,
+                    "descripcion": post.descripcion,
+                    "created_at": post.created_at,
+                    "comment_count": Comment.objects.filter(post=post).count(),
+                    "reaction_count": Reaction.objects.filter(post=post).count(),
+                    "view_comments": f"{settings.COMMENT_API_URL}{post.id}/",
+                    "view_people_who_react": f"{settings.REACTION_API_URL}{post.id}/",
+                }
                 for post in result_page 
             ]
 
+            # Devuelve la respuesta con el nuevo formato
             paginated_response = paginator.get_paginated_response(posts_with_username)
             return paginated_response
         except Exception as e:
